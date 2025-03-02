@@ -1,0 +1,34 @@
+# .golangci.toml
+run:
+  timeout: 3m
+  skip-dirs:
+    - .github
+
+linters:
+  enable:
+    - gofmt           # Enforce gofmt formatting
+    - golint          # Basic linting (deprecated but included for legacy)
+    - govet           # Vet examines Go source code
+    - staticcheck     # Advanced static analysis
+    - unused          # Checks for unused variables/functions
+    - errcheck        # Checks for unchecked errors
+    - ineffassign     # Detects ineffective assignments
+    - misspell        # Finds common spelling mistakes
+
+linters-settings:
+  gofmt:
+    simplify: true
+  golint:
+    min-confidence: 0.8
+  staticcheck:
+    checks: ["all"]
+  misspell:
+    locale: US
+
+issues:
+  exclude-rules:
+    - path: main.go
+      linters:
+        - golint  # Allow some flexibility in main package
+  max-issues-per-linter: 50
+  max-same-issues: 10
