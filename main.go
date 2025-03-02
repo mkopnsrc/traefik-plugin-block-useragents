@@ -1,4 +1,4 @@
-// Package traefik_plugin_block_useragents a plugin to block User-Agent based on browsers and OS.
+// Package traefik_plugin_block_useragents provides a plugin to block User-Agent based on browsers and OS.
 package traefik_plugin_block_useragents
 
 import (
@@ -34,9 +34,9 @@ func CreateConfig() *Config {
 
 // BlockUserAgents struct.
 type BlockUserAgents struct {
-    name          string
-    next          http.Handler
-    regexpsAllow  []*regexp.Regexp // Browser regex patterns
+    name           string
+    next           http.Handler
+    regexpsAllow   []*regexp.Regexp // Browser regex patterns
     osRegexpsAllow []*regexp.Regexp // OS regex patterns (optional)
 }
 
@@ -57,13 +57,10 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
     for _, bc := range config.AllowedBrowsers {
         var pattern string
         if bc.Regex != "" {
-            // Use user-provided regex directly
             pattern = bc.Regex
         } else if bc.Version != "" {
-            // Generate regex from version using the browser name dynamically
             pattern = buildRegexPattern(bc.Name, bc.Version)
         } else {
-            // Skip if neither Regex nor Version is provided
             continue
         }
 
@@ -84,9 +81,9 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
     }
 
     return &BlockUserAgents{
-        name:          name,
-        next:          next,
-        regexpsAllow:  regexpsAllow,
+        name:           name,
+        next:           next,
+        regexpsAllow:   regexpsAllow,
         osRegexpsAllow: osRegexpsAllow,
     }, nil
 }
@@ -135,7 +132,6 @@ func (b *BlockUserAgents) ServeHTTP(res http.ResponseWriter, req *http.Request) 
         }
     }
 
-    // If both checks pass (or OS check is skipped), proceed
     b.next.ServeHTTP(res, req)
 }
 
@@ -157,10 +153,7 @@ func (b *BlockUserAgents) logBlockedRequest(req *http.Request, reason string) {
 
 // buildRegexPattern creates a regex pattern dynamically based on the browser name and version.
 func buildRegexPattern(browser, version string) string {
-    // Escape the browser name to prevent regex injection
     b := regexp.QuoteMeta(browser)
-    // If version starts with ">", strip it and treat as a minimum version
     v := regexp.QuoteMeta(strings.TrimPrefix(version, ">"))
-    // Generic pattern: "BrowserName/Version(\.\d+)*"
     return fmt.Sprintf(`%s/%s(\.\d+)*`, b, v)
 }
