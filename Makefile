@@ -6,7 +6,7 @@ all: lint build
 
 # Build the plugin
 build:
-    GO111MODULE=on go build -buildmode=plugin -o traefik-plugin-block-useragents.so .
+    GO111MODULE=on go build -buildmode=plugin -o block_useragents.so .
 
 # Run linters
 lint:
@@ -14,7 +14,7 @@ lint:
 
 # Clean up generated files
 clean:
-    rm -f traefik-plugin-block-useragents.so
+    rm -f block_useragents.so
 
 # Install dependencies (if needed in the future)
 deps:

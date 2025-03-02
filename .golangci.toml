@@ -28,7 +28,7 @@ locale = "US"
 
 [issues]
 [[issues.exclude-rules]]
-path = "main.go"
+path = "block_useragents.go"
 linters = ["revive"]
 max-issues-per-linter = 50
 max-same-issues = 10

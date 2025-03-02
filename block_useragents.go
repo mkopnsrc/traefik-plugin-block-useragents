@@ -1,5 +1,5 @@
 // Package traefik_plugin_block_useragents provides a plugin to block User-Agent based on browsers and OS.
-package main
+package block_useragents
 
 import (
 	"context"

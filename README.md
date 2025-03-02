@@ -29,7 +29,7 @@ A Traefik middleware plugin to block HTTP requests based on the `User-Agent` hea
 ```yaml
 experimental:
   plugins:
-    blockUserAgents:
+    block_useragents:
       moduleName: "github.com/mkopnsrc/traefik-plugin-block-useragents"
       version: "v1.0" # Optional
 ```
@@ -39,7 +39,7 @@ experimental:
 ```yaml
 experimental:
   localPlugins:
-    blockUserAgents:
+    block_useragents:
       moduleName: "github.com/mkopnsrc/traefik-plugin-block-useragents"
 ```
 
@@ -50,7 +50,7 @@ http:
   middlewares:
     block-ua:
       plugin:
-        blockUserAgents:
+        block_useragents:
           allowedBrowsers:
             - name: "Chrome"
               regex: "Chrome/12[0-1].*"
@@ -65,7 +65,7 @@ http:
   middlewares:
     block-ua:
       plugin:
-        blockUserAgents:
+        block_useragents:
           allowedBrowsers:
             - name: "Chrome"
               version: ">130"

@@ -10,6 +10,7 @@ on:
 
 jobs:
   build:
+    name: Build Plugin
     runs-on: ubuntu-latest
 
     steps:
@@ -37,12 +38,12 @@ jobs:
       # Build the plugin
       - name: Build plugin
         run: |
-          GO111MODULE=on go build -buildmode=plugin -o traefik-plugin-block-useragents.so main.go
+          GO111MODULE=on go build -v -buildmode=plugin -o block_useragents.so block_useragents.go
 
       # Upload the .so file as an artifact
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
-          name: traefik-plugin-block-useragents.so
-          path: traefik-plugin-block-useragents.so
+          name: block_useragents.so
+          path: block_useragents.so
           retention-days: 7
