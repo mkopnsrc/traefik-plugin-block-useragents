@@ -37,7 +37,7 @@ jobs:
       # Build the plugin
       - name: Build plugin
         run: |
-          GO111MODULE=on go build -buildmode=plugin -o traefik-plugin-block-useragents.so .
+          GO111MODULE=on go build -buildmode=plugin -o traefik-plugin-block-useragents.so main.go
 
       # Upload the .so file as an artifact
       - name: Upload artifact
