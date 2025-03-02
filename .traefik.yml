@@ -1,0 +1,15 @@
+# .traefik.yml
+displayName: Block User-Agents
+type: middleware
+import: github.com/mkopnsrc/traefik-plugin-block-useragents
+summary: Blocks HTTP requests based on User-Agent, checking browsers and optionally OS types.
+description: |
+  A Traefik middleware plugin that blocks requests unless the User-Agent matches user-defined browser patterns (via regex or version) and, optionally, OS patterns. Fully customizable with no external dependencies.
+testData:
+  allowedBrowsers:
+    - name: "Chrome"
+      regex: "Chrome/12[0-1].*"
+    - name: "Firefox"
+      version: ">122"
+  allowedOSTypes:
+    - "Windows NT 10\\.0"
