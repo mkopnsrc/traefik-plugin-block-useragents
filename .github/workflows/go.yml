@@ -21,7 +21,7 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.0'  # Matches go.mod
+          go-version: '1.22.0'  # Matches go.mod
 
       # Install golangci-lint (latest version)
       - name: Install golangci-lint
