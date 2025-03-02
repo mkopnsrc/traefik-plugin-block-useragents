@@ -21,18 +21,18 @@ jobs:
       - name: Set up Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.24.0'  # Matches go.mod requirement
-          cache: true
+          go-version: '1.24.0'  # Matches go.mod
 
-      # Install golangci-lint
+      # Install golangci-lint (latest version)
       - name: Install golangci-lint
         run: |
-          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.55.2
+          curl -sSfL https://raw.githubusercontent.com/golangci/golangci-lint/master/install.sh | sh -s -- -b $(go env GOPATH)/bin v1.61.0
+          $(go env GOPATH)/bin/golangci-lint --version  # Verify version
 
       # Run linting
       - name: Lint code
         run: |
-          $(go env GOPATH)/bin/golangci-lint run --timeout=3m
+          $(go env GOPATH)/bin/golangci-lint run --timeout=5m
 
       # Build the plugin
       - name: Build plugin
@@ -45,4 +45,4 @@ jobs:
         with:
           name: traefik-plugin-block-useragents.so
           path: traefik-plugin-block-useragents.so
-          retention-days: 7  # Keep artifact for 7 days
+          retention-days: 7

@@ -1,3 +1,3 @@
 module github.com/mkopnsrc/traefik-plugin-block-useragents
 
-go 1.24.0
+go 1.24
