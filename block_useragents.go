@@ -1,4 +1,4 @@
-// Package main provides a plugin to block User-Agent based on browsers and OS.
+// Package traefik_plugin_block_useragents provides a plugin to block User-Agent based on browsers and OS.
 package traefik_plugin_block_useragents
 
 import (
@@ -8,6 +8,7 @@ import (
 	"log"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ import (
 type BrowserConfig struct {
 	Name    string `json:"name"`              // Browser name (e.g., "Chrome")
 	Regex   string `json:"regex,omitempty"`   // Optional: Exact regex pattern
-	Version string `json:"version,omitempty"` // Optional: Version for regex generation (e.g., ">121")
+	Version string `json:"version,omitempty"` // Optional: Version for comparison (e.g., ">121")
 }
 
 // Config holds the plugin configuration.
@@ -32,12 +33,12 @@ func CreateConfig() *Config {
 	}
 }
 
-// BlockUserAgents struct.
+// BlockUserAgents struct holds the plugin instance data.
 type BlockUserAgents struct {
-	name           string
-	next           http.Handler
-	regexpsAllow   []*regexp.Regexp // Browser regex patterns
-	osRegexpsAllow []*regexp.Regexp // OS regex patterns (optional)
+	name            string
+	next            http.Handler
+	allowedBrowsers []BrowserConfig
+	osRegexpsAllow  []*regexp.Regexp
 }
 
 // BlockUserAgentsMessage struct for logging blocked requests.
@@ -61,28 +62,7 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
 	if err := ValidateConfig(config); err != nil {
 		return nil, err
 	}
-	regexpsAllow := make([]*regexp.Regexp, 0)
 	osRegexpsAllow := make([]*regexp.Regexp, 0)
-
-	// Generate regex patterns for allowed browsers
-	for _, bc := range config.AllowedBrowsers {
-		var pattern string
-		if bc.Regex != "" {
-			pattern = bc.Regex
-		} else if bc.Version != "" {
-			pattern = buildRegexPattern(bc.Name, bc.Version)
-		} else {
-			continue
-		}
-
-		re, err := regexp.Compile(pattern)
-		if err != nil {
-			return nil, fmt.Errorf("error compiling browser regex for %s: %w", bc.Name, err)
-		}
-		regexpsAllow = append(regexpsAllow, re)
-	}
-
-	// Generate regex patterns for allowed OS types (if provided)
 	for _, osPattern := range config.AllowedOSTypes {
 		re, err := regexp.Compile(osPattern)
 		if err != nil {
@@ -90,16 +70,15 @@ func New(_ context.Context, next http.Handler, config *Config, name string) (htt
 		}
 		osRegexpsAllow = append(osRegexpsAllow, re)
 	}
-
 	return &BlockUserAgents{
-		name:           name,
-		next:           next,
-		regexpsAllow:   regexpsAllow,
-		osRegexpsAllow: osRegexpsAllow,
+		name:            name,
+		next:            next,
+		allowedBrowsers: config.AllowedBrowsers,
+		osRegexpsAllow:  osRegexpsAllow,
 	}, nil
 }
 
-// ServeHTTP handles the HTTP request.
+// ServeHTTP handles the HTTP request and applies the blocking logic.
 func (b *BlockUserAgents) ServeHTTP(res http.ResponseWriter, req *http.Request) {
 	if req == nil {
 		res.WriteHeader(http.StatusBadRequest)
@@ -113,12 +92,26 @@ func (b *BlockUserAgents) ServeHTTP(res http.ResponseWriter, req *http.Request) 
 		return
 	}
 
-	// Check browser patterns
+	// Check browser conditions
 	browserMatch := false
-	for _, re := range b.regexpsAllow {
-		if re.MatchString(userAgent) {
-			browserMatch = true
-			break
+	for _, bc := range b.allowedBrowsers {
+		if bc.Regex != "" {
+			re, err := regexp.Compile(bc.Regex)
+			if err != nil {
+				log.Printf("Invalid regex for %s: %v", bc.Name, err)
+				continue
+			}
+			if re.MatchString(userAgent) {
+				browserMatch = true
+				break
+			}
+		} else if bc.Version != "" && strings.HasPrefix(bc.Version, ">") {
+			threshold := strings.TrimPrefix(bc.Version, ">")
+			detectedVersion, found := extractBrowserVersion(userAgent, bc.Name)
+			if found && versionGreaterThan(detectedVersion, threshold) {
+				browserMatch = true
+				break
+			}
 		}
 	}
 	if !browserMatch {
@@ -143,6 +136,7 @@ func (b *BlockUserAgents) ServeHTTP(res http.ResponseWriter, req *http.Request) 
 		}
 	}
 
+	// If all conditions pass, proceed to the next handler
 	b.next.ServeHTTP(res, req)
 }
 
@@ -162,9 +156,41 @@ func (b *BlockUserAgents) logBlockedRequest(req *http.Request, reason string) {
 	}
 }
 
-// buildRegexPattern creates a regex pattern dynamically based on the browser name and version.
-func buildRegexPattern(browser, version string) string {
-	b := regexp.QuoteMeta(browser)
-	v := regexp.QuoteMeta(strings.TrimPrefix(version, ">"))
-	return fmt.Sprintf(`%s/%s(\.\d+)*`, b, v)
+// extractBrowserVersion extracts the version number following the browser name in the User-Agent string.
+func extractBrowserVersion(userAgent, browser string) (string, bool) {
+	// Escape the browser name to handle special characters
+	escapedBrowser := regexp.QuoteMeta(browser)
+	// Look for the browser name followed by a slash and a version number (digits and dots)
+	re := regexp.MustCompile(escapedBrowser + `/([\d.]+)`)
+	matches := re.FindStringSubmatch(userAgent)
+	if len(matches) > 1 {
+		return matches[1], true
+	}
+	return "", false
+}
+
+// versionGreaterThan compares two version strings numerically.
+func versionGreaterThan(v1, v2 string) bool {
+	parts1 := strings.Split(v1, ".")
+	parts2 := strings.Split(v2, ".")
+	// Pad the shorter version with zeros
+	for len(parts1) < len(parts2) {
+		parts1 = append(parts1, "0")
+	}
+	for len(parts2) < len(parts1) {
+		parts2 = append(parts2, "0")
+	}
+	for i := 0; i < len(parts1); i++ {
+		p1, err1 := strconv.Atoi(parts1[i])
+		p2, err2 := strconv.Atoi(parts2[i])
+		if err1 != nil || err2 != nil {
+			return false // Invalid version parts
+		}
+		if p1 > p2 {
+			return true
+		} else if p1 < p2 {
+			return false
+		}
+	}
+	return false // Versions are equal
 }
