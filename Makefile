@@ -1,21 +1,32 @@
 # Makefile
 .PHONY: all build lint clean
-
 # Default target
 all: lint build
 
-# Build the plugin
-build:
-    GO111MODULE=on go build -buildmode=plugin -o block_useragents.so .
+.PHONY: ci
+ci: inst tidy all vulncheck
 
+.PHONY: lint
 # Run linters
 lint:
     golangci-lint run
 
-# Clean up generated files
-clean:
-    rm -f block_useragents.so
-
 # Install dependencies (if needed in the future)
 deps:
     go mod tidy
+
+# Run vulnerability check
+vulncheck:
+		gosec ./...
+
+# Build the plugin
+build:
+    GO111MODULE=on go build -buildmode=plugin -o block_UserAgents.so .
+
+# Run tests
+test:
+		go test -v ./...
+
+# Clean up generated files
+clean:
+    rm -f block_UserAgents.so
