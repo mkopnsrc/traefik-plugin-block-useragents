@@ -6,15 +6,12 @@ A Traefik middleware plugin to block HTTP requests based on the `User-Agent` hea
 - Blocks all `User-Agent`s by default.
 - Allows user-defined browsers via:
   - Custom regex patterns (e.g., `MyBrowser/12[0-1].*`).
-  - Version thresholds (e.g., `>121` generates `MyBrowser/121.*`).
 - Optional OS type filtering with regex patterns.
 - No external APIs or caching; relies entirely on user configuration.
 - Browser names are dynamic and used as provided in regex generation.
 
 ## Notes
- - Requirements: At least one `allowedBrowsers` entry with either `regex` or `version` is required. If none are provided, all requests will be blocked.
- - Dynamic Browser Names: The `name` field in `allowedBrowsers` is used as-is in regex generation when `version` is provided (e.g., `CustomBot/1.0.*`).
- - Version Handling: The `version` field with > generates a regex (e.g., `>121` becomes `Browser/121.*`). Without `>`, it matches exactly (e.g., `121` becomes `Browser/121.*`).
+ - Requirements: At least one `allowedBrowsers` entry with either `regex` is required. If none are provided, all requests will be blocked.
  - OS Patterns: `allowedOSTypes` expects regex patterns. Use exact strings (e.g., `Windows NT 10\.0`) or wildcards (e.g., `Android [8-9]\.[0-9]+`) as needed.
  - No Dependencies: The plugin is lightweight with no external dependencies.
 
@@ -53,9 +50,9 @@ http:
         block_useragents:
           allowedBrowsers:
             - name: "Chrome"
-              regex: "Chrome/12[0-1].*"
+              regex: "Chrome/13[0-3].*" # Chrome 130-133
             - name: "Firefox"
-              version: ">122"
+              regex: "Firefox/13[1-5].*" # Firefox 131-135
 ```
 
 
@@ -68,21 +65,20 @@ http:
         block_useragents:
           allowedBrowsers:
             - name: "Chrome"
-              version: ">130"
+              regex: "Chrome/13[0-3].*" # Chrome 130-133
             - name: "Firefox"
-              regex: "Firefox/13[1-5].*"
-            - name: "Safari"
-              version: ">533"
+              regex: "Firefox/13[1-5].*" # Firefox 131-135
             - name: "Edg" # Microsoft Edge
-              version: ">100"
+              version: "Edg/10[0-9]" # Edge 100-199
             - name: "Brave" 
-              version: ">1.75"
+              version: "Brave/1.[7][5-9]" # Brave 1.75-1.99
             - name: "CriOS" # Chrome for iOS
               regex: "CriOS/13[0-9]"
           allowedOSTypes:
             - "Windows NT 10\.0" # Windows 10
             - "Mac OS X 10\.[0-9]+" # macOS 10.x
             - "Linux" # Linux
+            - "X11" # Unix
             - "Android" # Android
             - "iOS" # iOS
 ```

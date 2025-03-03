@@ -8,8 +8,19 @@ description: |
 testData:
   allowedBrowsers:
     - name: "Chrome"
-      regex: "Chrome/12[0-1].*"
+      regex: "Chrome/13[0-3].*" # Chrome 130-133
     - name: "Firefox"
-      version: ">122"
+      regex: "Firefox/13[1-5].*" # Firefox 131-135
+    - name: "Edg" # Microsoft Edge
+      version: "Edg/10[0-9]" # Edge 100-199
+    - name: "Brave" 
+      version: "Brave/1.[7][5-9]" # Brave 1.75-1.99
+    - name: "CriOS" # Chrome for iOS
+      regex: "CriOS/13[0-9]"
   allowedOSTypes:
-    - "Windows NT 10\\.0"
+    - "Windows NT 10\.0" # Windows 10
+    - "Mac OS X 10\.[0-9]+" # macOS 10.x
+    - "Linux" # Linux
+    - "X11" # Unix
+    - "Android" # Android
+    - "iOS" # iOS
