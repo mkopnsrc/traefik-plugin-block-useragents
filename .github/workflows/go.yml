@@ -13,11 +13,6 @@ jobs:
         GO_VERSION: '1.22.0' # Latest stable Go version
         GOLANGCI_LINT_VERSION: v1.61.0 # Latest golangci-lint
 
-    # Set up the working directory
-    defaults:
-      run:
-        working-directory: ${{ github.workspace }}/go/src/github.com/${{ github.repository }}
-
     steps:
       # Set up Go
       - name: Set up Go ${{ env.GO_VERSION }}
