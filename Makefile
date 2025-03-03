@@ -1,5 +1,6 @@
 # Makefile
 .PHONY: all build lint clean
+
 # Default target
 all: lint build
 
@@ -21,7 +22,7 @@ vulncheck:
 
 # Build the plugin
 build:
-    GO111MODULE=on go build -buildmode=plugin -o block_UserAgents.so .
+    go build -buildmode=plugin -o traefik-plugin-block-useragents.so block_useragents.go
 
 # Run tests
 test:
@@ -29,4 +30,4 @@ test:
 
 # Clean up generated files
 clean:
-    rm -f block_UserAgents.so
+    rm -f traefik-plugin-block-useragents.so
