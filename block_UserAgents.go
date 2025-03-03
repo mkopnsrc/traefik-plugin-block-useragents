@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-)	
+)
 
 // BrowserConfig defines configuration for a single browser.
 type BrowserConfig struct {
@@ -51,7 +51,7 @@ type BlockUserAgentsMessage struct {
 // ValidateConfig validates the plugin configuration.
 func ValidateConfig(config *Config) error {
 	if len(config.AllowedBrowsers) == 0 {
-			return fmt.Errorf("at least one allowed browser must be specified")
+		return fmt.Errorf("at least one allowed browser must be specified")
 	}
 	return nil
 }
