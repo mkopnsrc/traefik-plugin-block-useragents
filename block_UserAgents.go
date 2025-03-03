@@ -1,5 +1,5 @@
 // Package traefik_plugin_block_useragents provides a plugin to block User-Agent based on browsers and OS.
-package block_useragents
+package main
 
 import (
 	"context"
@@ -9,7 +9,7 @@ import (
 	"net/http"
 	"regexp"
 	"strings"
-)
+)	
 
 // BrowserConfig defines configuration for a single browser.
 type BrowserConfig struct {
@@ -48,8 +48,19 @@ type BlockUserAgentsMessage struct {
 	RequestURI string `json:"uri"`
 }
 
+// ValidateConfig validates the plugin configuration.
+func ValidateConfig(config *Config) error {
+	if len(config.AllowedBrowsers) == 0 {
+			return fmt.Errorf("at least one allowed browser must be specified")
+	}
+	return nil
+}
+
 // New creates and returns a plugin instance.
 func New(_ context.Context, next http.Handler, config *Config, name string) (http.Handler, error) {
+	if err := ValidateConfig(config); err != nil {
+		return nil, err
+	}
 	regexpsAllow := make([]*regexp.Regexp, 0)
 	osRegexpsAllow := make([]*regexp.Regexp, 0)
 
