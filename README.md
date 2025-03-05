@@ -1,21 +1,18 @@
 # Traefik Plugin: Block User-Agent
 
-A Traefik middleware plugin to block HTTP requests based on the `User-Agent` header, allowing only user-specified browser patterns.
+A Traefik middleware plugin to block all HTTP requests by default and allowing only HTTP requests based on the user-specified `User-Agent` patterns for Browser and OS types.
 
 ## Features
-- Blocks all `User-Agent`s by default.
+- Blocks all `User-Agent` by default.
 - Allows user-defined browsers via:
   - Custom regex patterns (e.g., `MyBrowser/12[0-1].*`).
-- Optional OS type filtering with regex patterns.
+- Optional OS type filtering with regex patterns. See example below.
 - No external APIs or caching; relies entirely on user configuration.
-- Browser names are dynamic and used as provided in regex generation.
 
 ## Notes
- - Requirements: At least one `allowedBrowsers` entry with either `regex` is required. If none are provided, all requests will be blocked.
+ - Requirements: At least one `allowedBrowsers` entry with `name` and it's `regex` is required.
  - OS Patterns: `allowedOSTypes` expects regex patterns. Use exact strings (e.g., `Windows NT 10\.0`) or wildcards (e.g., `Android [8-9]\.[0-9]+`) as needed.
  - No Dependencies: The plugin is lightweight with no external dependencies.
-
-
 
 ## Usage
 1. Add the plugin to your Traefik configuration.
